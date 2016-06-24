@@ -25,3 +25,7 @@ class NotSupportedToolError(PTPError):
 class NotSupportedVersionError(PTPError):
     """:mod:`ptp` error when the version of the tool is not supported."""
     pass
+
+class VersionError(PTPError):
+	""":mod:`ptp` error when unable to get the version from file."""
+	pass

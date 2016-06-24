@@ -11,7 +11,7 @@ import re
 from lxml.etree import XMLSyntaxError
 
 from ptp.libptp import constants
-from ptp.libptp.exceptions import NotSupportedVersionError
+from ptp.libptp.exceptions import NotSupportedVersionError, VersionError
 from ptp.libptp.parser import XMLParser
 
 
@@ -66,18 +66,20 @@ class W3AFXMLParser(XMLParser):
         cls.pathname = pathname # pathname is used later so making it accessible
         try:
             stream = cls.handle_file(pathname, filename, first=first)
-        except (IOError, TypeError, XMLSyntaxError):
+        except (IOError, TypeError) as exception:
+            raise exception
+        except XMLSyntaxError:
             return False
         version = stream.find('.//w3af-version')
         if version is None:
-            return False
+            raise VersionError("Can't find w3af-version element in xml file")
         version = cls._re_version.findall(version.text)
         if not version:
-            return False
+            raise VersionError("Unable to parse version from w3af-version element")
         if len(version) >= 1:  # In case we found several version numbers.
             version = version[0]
         if not re.findall(cls.__version__, version, re.IGNORECASE):
-            return False
+            raise NotSupportedVersionError('PTP does NOT support this version of W3AF.')
         return True
 
     def parse_metadata(self):

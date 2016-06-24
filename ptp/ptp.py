@@ -7,8 +7,9 @@
 """
 
 import warnings
+import os
 
-from .libptp.exceptions import NotSupportedToolError, NotSupportedVersionError
+from .libptp.exceptions import NotSupportedToolError, NotSupportedVersionError, VersionError
 from .libptp.constants import UNKNOWN, RANKING_SCALE
 from .tools.arachni.parser import ArachniJSONParser
 from .tools.skipfish.parser import SkipfishJSParser
@@ -108,10 +109,12 @@ class PTP(object):
                 if parser.is_mine(*args, **kwargs):
                     self.parser = parser
                     break
-            except TypeError:
-                pass
-            except NotSupportedVersionError:
-                pass
+            except (IOError, TypeError, NotSupportedVersionError, VersionError) as exception:
+                if len(self.tool_name):
+                    raise exception
+                else:
+                    pass
+
         # Check if instantiated.
         if self.parser and not hasattr(self.parser, 'stream'):
             self.parser = self.parser(*args, **kwargs)
@@ -139,7 +142,10 @@ class PTP(object):
             self.parser = None
             self._init_parser(*args, **kwargs)
         if self.parser is None:
-            raise NotSupportedToolError('This tool is not supported by PTP.')
+            if os.path.isdir(args[0]):
+                raise NotSupportedToolError('This tool is not supported by PTP.')
+            else:
+                raise Exception("Unable to find '%s'" % args[0])
         # Instantiate the report class.
         self.tool_name = self.parser.__tool__
         self.metadata = self.parser.parse_metadata()
