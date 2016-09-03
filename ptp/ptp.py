@@ -11,7 +11,7 @@ import warnings
 
 from .libptp.exceptions import NotSupportedToolError, NotSupportedVersionError
 from .libptp.constants import UNKNOWN, RANKING_SCALE
-from .tools.arachni.parser import ArachniXMLParser
+from .tools.arachni.parser import ArachniXMLParser, ArachniJSParser
 from .tools.skipfish.parser import SkipfishJSParser
 from .tools.w3af.parser import W3AFXMLParser
 from .tools.wapiti.parser import WapitiXMLParser, Wapiti221XMLParser
