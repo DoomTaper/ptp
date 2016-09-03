@@ -37,7 +37,7 @@ class ArachniXMLParser(XMLParser):
         LOW: constants.LOW,
         INFO: constants.INFO}
 
-    def __init__(self, pathname, filename='*.xml', first=True):
+    def __init__(self, pathname, filename='*.xml', http_parse=False, first=True):
         """Initialize ArachniXMLParser.
 
         :param str pathname: Path to the report directory.
@@ -45,10 +45,10 @@ class ArachniXMLParser(XMLParser):
         :param bool first: Only process first file (``True``) or each file that matched (``False``).
 
         """
-        XMLParser.__init__(self, pathname, filename, first=first)
+        XMLParser.__init__(self, pathname, filename, http_parse=http_parse, first=first)
 
     @classmethod
-    def is_mine(cls, pathname, filename='*.xml', first=True):
+    def is_mine(cls, pathname, filename='*.xml', http_parse=False, first=True):
         """Check if it can handle the report file.
 
         :param str pathname: Path to the report directory.
@@ -123,10 +123,11 @@ class ArachniXMLParser(XMLParser):
         self.vulns = [
             {'ranking': self.RANKING_SCALE[vuln.find('.//severity').text.lower()]}
             for vuln in self.stream.find('.//issues')]
-        temp = []
-        for record in self.stream.xpath('//variations//variation//referring_page'):
-            temp.append(record.getchildren())
-        self.vulns.append({'transactions': self.get_data(temp)})
+        if(self.__http_parse__):
+            temp = []
+            for record in self.stream.xpath('//variations//variation//referring_page'):
+                temp.append(record.getchildren())
+            self.vulns.append({'transactions': self.get_data(temp)})
         return self.vulns
 
 
@@ -152,16 +153,16 @@ class ArachniJSParser(JSONParser):
         LOW: constants.LOW,
         INFO: constants.INFO}
 
-    def __init__(self, pathname, filename='*.json', first=True):
+    def __init__(self, pathname, filename='*.json', http_parse=False, first=True):
         """Initialize ArachniXMLParser.
         :param str pathname: Path to the report directory.
         :param str filename: Regex matching the report file.
         :param bool first: Only process first file (``True``) or each file that matched (``False``).
         """
-        JSONParser.__init__(self, pathname, filename, first=first)
+        JSONParser.__init__(self, pathname, filename, http_parse=http_parse, first=first)
 
     @classmethod
-    def is_mine(cls, pathname, filename='*.json', first=True):
+    def is_mine(cls, pathname, filename='*.json', http_parse=False, first=True):
         """Check if it can handle the report file.
         :param str pathname: Path to the report directory.
         :param str filename: Regex matching the report file.
